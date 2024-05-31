@@ -1,0 +1,14 @@
+{
+    "name": "Storage tool",
+    "version": "1.0.0",
+    "description": "Tool for managing storage",
+    "scripts":  {
+        "start":  "web-ext run --source-dir ./src --watch-file",
+        "build":  "web-ext run --source-dir ./src",
+        "lint":  "web-ext lint --source-dir ./src"
+    },
+    "devDependencies": {
+        "@types/chrome": "0.0.268",
+        "web-ext": "8.0.0"
+    }
+}

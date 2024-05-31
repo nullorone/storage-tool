@@ -1,0 +1,37 @@
+{
+    "manifest_version": 3,
+    "name": "__MSG_name__",
+    "description": "__MSG_description__",
+    "author": "sy.v@mail.ru",
+    "default_locale": "en",
+    "version": "1.0.0",
+    "icons": {
+        "32": "icons/icon-32.png",
+        "64": "icons/icon-64.png",
+        "128": "icons/icon-128.png"
+    },
+    "content_scripts": [
+        {
+            "js": [
+                "content-script.js"
+            ],
+            "run_at": "document_idle",
+            "all_frames": false,
+            "matches": [
+                "<all_urls>"
+            ]
+        }
+    ],
+    "action": {
+        "default_popup": "popup.html"
+    },
+    "background": {
+        "service_worker": "background.js"
+    },
+    "host_permissions": [
+        "<all_urls>"
+    ],
+    "permissions": [
+        "storage", "activeTab", "tabs"
+    ]
+}

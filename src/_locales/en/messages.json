@@ -1,0 +1,10 @@
+{
+    "name": {
+        "message": "Storage Tool",
+        "description": "extension name"
+    },
+    "description": {
+        "message": "Tool for managing storage",
+        "description": "extension description"
+    }
+}

@@ -1,0 +1,10 @@
+{
+    "name": {
+        "message": "Storage Tool",
+        "description": "extension name"
+    },
+    "description": {
+        "message": "Инструмент для управления хранилищем",
+        "description": "extension description"
+    }
+}
