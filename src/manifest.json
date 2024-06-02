@@ -18,7 +18,8 @@
             "run_at": "document_idle",
             "all_frames": false,
             "matches": [
-                "<all_urls>"
+                "http://*/*",
+                "https://*/*"
             ]
         }
     ],
@@ -29,7 +30,8 @@
         "service_worker": "background.js"
     },
     "host_permissions": [
-        "<all_urls>"
+        "http://*/*",
+        "https://*/*"
     ],
     "permissions": [
         "storage", "activeTab", "tabs"

@@ -1,19 +1,54 @@
 chrome.runtime.onMessage.addListener((message, info, cb) => {
     if (message.action === "getStorage") {
-        chrome.storage.local.get('tool').then((result) =>  {
-            cb(result.tool);
+        getCurrentTab()
+            .then((tab)  =>  {
+                chrome.storage.local.get(tab.url)
+                    .then((result) =>  {
+                        cb(result[tab.url]);
+                    })
+                    .catch(()  =>  {
+                        cb({});
+                    });
         });
+
         return true;
     }
 
     if (message.action  ===  "setStorage")  {
-        chrome.storage.local.set({'tool': JSON.stringify(message.payload)});
+        const {name, ...data} = message.payload;
+        chrome.storage.local.set({[name]: JSON.stringify({...data})});
+
+        return true;
+    }
+
+    if (message.action  ===  "syncStorage")   {
+        sendMessageToActiveTab('syncStorage', (res) => {
+            const name = res.name;
+            chrome.storage.local.get(name)
+                .then((result) =>  {
+                    cb(result[name]);
+                }).catch(()  =>  {
+                cb({});
+            });
+        });
+
+        return true;
     }
 });
 
-async function getCurrentTabId() {
+async function getCurrentTab() {
     let queryOptions = { active: true, lastFocusedWindow: true };
-    // `tab` will either be a `tabs.Tab` instance or `undefined`.
     let [tab] = await chrome.tabs.query(queryOptions);
-    return tab.id;
+    return tab;
+}
+
+async function sendMessageToActiveTab(message, cb) {
+    const tab = await getCurrentTab();
+    if (tab && tab.id) {
+        const response = await chrome.tabs.sendMessage(tab.id, message);
+
+        if (response) {
+            cb(response);
+        }
+    }
 }

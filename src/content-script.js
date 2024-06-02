@@ -1,9 +1,25 @@
-chrome.runtime.onMessage.addListener((request, ...other)  =>  {
-    console.log(request, ...other);
+chrome.runtime.onMessage.addListener((message, info, cb)  =>  {
+    if (message === 'syncStorage') {
+        cb({
+            name: location.href,
+            storage: {
+                local: localStorage,
+            },
+        });
+    }
 });
 
+init();
+
 function init() {
-    chrome.runtime.sendMessage({action: 'setStorage', payload: localStorage});
+    sendStorage();
 }
 
-init();
+function sendStorage() {
+    chrome.runtime.sendMessage({action: 'setStorage', payload: {
+            name: location.href,
+            storage: {
+                local: localStorage,
+            },
+        }});
+}
