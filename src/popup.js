@@ -1,32 +1,31 @@
-const mainButton = document.querySelector('#main-button');
 const editButton = document.querySelector('#edit-button');
 const clearButton = document.querySelector('#clear-button');
 const saveButton = document.querySelector('#save-button');
+const addButton = document.querySelector('#add-button');
 const outputSection  = document.querySelector('.output');
+const inputSection  = document.querySelector('.input');
 
 init();
 
-mainButton.addEventListener('click', () => {
-    outputSection.innerHTML = '';
-
-    chrome.runtime.sendMessage({ action: "syncStorage" }, (value)  =>  {
-        const storage = JSON.parse(value).storage.local;
-        outputSection.appendChild(createTable(storage));
-    });
-});
-
 editButton.addEventListener('click', ()  =>  {
-    document.querySelectorAll('.output__input').forEach((input)  =>  {
+    outputSection.querySelectorAll('.output__input').forEach((input)  =>  {
         input.disabled = false;
     });
 });
 
-saveButton.addEventListener('click', ()  =>  {
-    document.querySelectorAll('.output__input').forEach((input)  =>  {
-        input.disabled = true;
+clearButton.addEventListener('click', ()  =>  {
+    chrome.runtime.sendMessage({ action: "clearStorage" }, () => {
+        outputSection.innerHTML = '';
     });
 });
 
+saveButton.addEventListener('click', ()  =>  {
+    updateStorage(true);
+});
+
+addButton.addEventListener('click', ()  =>   {
+    inputSection.appendChild(createTable({'': ''}, 'input__table'));
+})
 
 function init() {
     chrome.runtime.sendMessage({ action: "getStorage" }, (value) => {
@@ -34,7 +33,34 @@ function init() {
 
         const storage = JSON.parse(value).storage.local;
         outputSection.appendChild(createTable(storage));
+        outputSection.querySelectorAll('.output__input').forEach((input)  =>  {
+            input.disabled = true;
+        });
     });
+}
+
+function updateStorage() {
+    const addedData = {};
+    const outputRows = outputSection.querySelectorAll('.output__row');
+    const inputRows = inputSection.querySelectorAll('.output__row');
+
+    [...outputRows, ...inputRows].forEach((row) => {
+        const keyCell = row.querySelector('.output__cell--key input');
+        const valueCell = row.querySelector('.output__cell--value input');
+        addedData[keyCell.value] = valueCell.value;
+    });
+
+    chrome.runtime.sendMessage({ action: "updateStorage",  payload: addedData  }, (value) => {
+        outputSection.innerHTML = '';
+        inputSection.innerHTML = '';
+
+        const storage = JSON.parse(value).storage.local;
+        outputSection.appendChild(createTable(storage));
+
+        outputSection.querySelectorAll('.output__input').forEach((input)  =>  {
+            input.disabled = true;
+        });
+    })
 }
 
 function createTableCell(content, cellModificator) {
@@ -43,7 +69,7 @@ function createTableCell(content, cellModificator) {
     const classModificator = cellModificator ? `output__cell--${cellModificator}` : ' ';
     input.classList.add('output__input');
     input.type = 'text';
-    input.disabled = true;
+    input.disabled = false;
     input.value = content;
 
     cell.classList.add('output__cell', 'cell', classModificator);
@@ -64,9 +90,9 @@ function createTableRow(nodes) {
     return row;
 }
 
-function createTable(data) {
+function createTable(data, className) {
     const table = document.createElement('table');
-    table.classList.add('output__table');
+    table.classList.add(className ?? 'output__table');
 
     const keys = Object.keys(data);
     const values = Object.values(data);

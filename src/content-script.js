@@ -1,11 +1,22 @@
 chrome.runtime.onMessage.addListener((message, info, cb)  =>  {
-    if (message === 'syncStorage') {
+    if (message.action === 'syncStorage') {
         cb({
             name: location.href,
             storage: {
                 local: localStorage,
             },
         });
+    }
+
+    if (message.action === 'clearStorage') {
+        localStorage.clear();
+    }
+
+    if (message.action === 'updateStorage') {
+        const localStorageOfBackground = message.payload.storage.local;
+        Object.keys(localStorageOfBackground).forEach((key) => {
+            localStorage.setItem(key, localStorageOfBackground[key]);
+        })
     }
 });
 

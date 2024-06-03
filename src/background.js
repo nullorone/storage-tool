@@ -21,18 +21,45 @@ chrome.runtime.onMessage.addListener((message, info, cb) => {
         return true;
     }
 
-    if (message.action  ===  "syncStorage")   {
-        sendMessageToActiveTab('syncStorage', (res) => {
-            const name = res.name;
-            chrome.storage.local.get(name)
-                .then((result) =>  {
-                    cb(result[name]);
-                }).catch(()  =>  {
-                cb({});
+    if (message.action === "updateStorage") {
+        const data = message.payload;
+
+        getCurrentTab()
+            .then((tab)  =>  {
+                chrome.storage.local.get(tab.url)
+                    .then((result) =>  {
+                        const resultStorage = JSON.parse(result[tab.url]).storage;
+                        const updatedStorage = {...resultStorage, local: data};
+                        const updatedData = {[tab.url]: JSON.stringify({storage: updatedStorage})};
+
+                        chrome.storage.local.set(updatedData)
+                            .then(() => {
+                                cb(JSON.stringify({storage: updatedStorage}));
+                            })
+                            .then(() => {
+                                sendMessageToActiveTab({action: 'updateStorage', payload: {storage: updatedStorage}});
+                            })
+                            .catch(()  =>  {
+                                cb({});
+                            });
+                    })
+                    .catch(()  =>  {
+                        cb({});
+                    });
             });
-        });
 
         return true;
+    }
+
+    if (message.action === "clearStorage") {
+        sendMessageToActiveTab({action: 'clearStorage'});
+        getCurrentTab()
+            .then((tab)  =>  {
+                chrome.storage.local.set({[tab.url]: JSON.stringify({storage: {}})});
+            })
+            .catch(()  =>  {
+                cb({});
+        });
     }
 });
 
@@ -47,7 +74,7 @@ async function sendMessageToActiveTab(message, cb) {
     if (tab && tab.id) {
         const response = await chrome.tabs.sendMessage(tab.id, message);
 
-        if (response) {
+        if (response && !!cb) {
             cb(response);
         }
     }
