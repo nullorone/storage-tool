@@ -2,7 +2,7 @@ chrome.runtime.onMessage.addListener((message, info, cb) => {
     if (message.action === "getStorage") {
         getCurrentTab()
             .then((tab)  =>  {
-                chrome.storage.local.get(tab.url)
+                chrome.storage.session.get(tab.url)
                     .then((result) =>  {
                         cb(result[tab.url]);
                     })
@@ -16,7 +16,18 @@ chrome.runtime.onMessage.addListener((message, info, cb) => {
 
     if (message.action  ===  "setStorage")  {
         const {name, ...data} = message.payload;
-        chrome.storage.local.set({[name]: JSON.stringify({...data})});
+        chrome.storage.session.set({[name]: JSON.stringify({...data})});
+
+        return true;
+    }
+
+    if (message.action  ===  "syncStorage") {
+        sendMessageToActiveTab({action: 'syncStorage'}, ({name, ...data}) => {
+            const storageLocalData = JSON.stringify({...data});
+
+            chrome.storage.session.set({[name]: storageLocalData});
+            cb(storageLocalData);
+        })
 
         return true;
     }
@@ -26,13 +37,13 @@ chrome.runtime.onMessage.addListener((message, info, cb) => {
 
         getCurrentTab()
             .then((tab)  =>  {
-                chrome.storage.local.get(tab.url)
+                chrome.storage.session.get(tab.url)
                     .then((result) =>  {
                         const resultStorage = JSON.parse(result[tab.url]).storage;
                         const updatedStorage = {...resultStorage, local: data};
                         const updatedData = {[tab.url]: JSON.stringify({storage: updatedStorage})};
 
-                        chrome.storage.local.set(updatedData)
+                        chrome.storage.session.set(updatedData)
                             .then(() => {
                                 cb(JSON.stringify({storage: updatedStorage}));
                             })
@@ -55,7 +66,7 @@ chrome.runtime.onMessage.addListener((message, info, cb) => {
         sendMessageToActiveTab({action: 'clearStorage'});
         getCurrentTab()
             .then((tab)  =>  {
-                chrome.storage.local.set({[tab.url]: JSON.stringify({storage: {}})});
+                chrome.storage.session.set({[tab.url]: JSON.stringify({storage: {}})});
             })
             .catch(()  =>  {
                 cb({});

@@ -2,6 +2,7 @@ const editButton = document.querySelector('#edit-button');
 const clearButton = document.querySelector('#clear-button');
 const saveButton = document.querySelector('#save-button');
 const addButton = document.querySelector('#add-button');
+const syncButton = document.querySelector('#sync-button');
 const outputSection  = document.querySelector('.output');
 const inputSection  = document.querySelector('.input');
 
@@ -20,11 +21,23 @@ clearButton.addEventListener('click', ()  =>  {
 });
 
 saveButton.addEventListener('click', ()  =>  {
-    updateStorage(true);
+    updateStorage();
 });
 
 addButton.addEventListener('click', ()  =>   {
     inputSection.appendChild(createTable({'': ''}, 'input__table'));
+})
+
+syncButton.addEventListener('click', ()  =>  {
+    outputSection.innerHTML = '';
+
+    chrome.runtime.sendMessage({ action: "syncStorage" }, (value) => {
+        const storage = JSON.parse(value).storage.local;
+        outputSection.appendChild(createTable(storage));
+        outputSection.querySelectorAll('.output__input').forEach((input)  =>  {
+            input.disabled = true;
+        });
+    });
 })
 
 function init() {
