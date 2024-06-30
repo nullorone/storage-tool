@@ -13,36 +13,29 @@
         <h1 class="header__title">Storage Tool</h1>
         <nav class="header__nav nav">
             <ul class="nav__list header-list">
-                <li class="header-list__item"><button class="header-list__button" name="local">Local</button></li>
-                <li class="header-list__item"><button class="header-list__button" name="session" disabled>Session</button></li>
-                <li class="header-list__item"><button class="header-list__button" name="shared" disabled>Shared</button></li>
-                <li class="header-list__item"><button class="header-list__button" id="sync-button" name="sync">Sync</button></li>
+                <li class="header-list__item"><button class="header-list__button active" name="local">local</button></li>
+                <li class="header-list__item"><button class="header-list__button" name="session" disabled title="coming soon">session</button></li>
+                <li class="header-list__item"><button class="header-list__button" name="shared" disabled title="coming soon">shared</button></li>
             </ul>
+            <button class="nav__button" id="sync-button" name="sync"><img src="./icons/icon-reload.png" alt="Icon reload"/></button>
         </nav>
         <div class="header__buttons buttons">
-            <button id="edit-button">Edit Mode</button>
-            <button id="clear-button">Clear All</button>
+            <button id="edit-button"><img src="./icons/icon-edit.png" alt="Icon edit"/>edit mode</button>
+            <button id="clear-button"><img src="./icons/icon-trash.png" alt="Icon trash"/>clear all</button>
         </div>
     </header>
     <main class="main">
         <section class="main__output output">
-            <table class="output__table"><tbody><tr class="output__row"><td class="output__cell cell output__cell--key" title="bank-count"><input class="output__input" type="text" disabled=""></td><td class="output__cell cell output__cell--value" title="3"><input class="output__input" type="text" disabled=""></td></tr><tr class="output__row"><td class="output__cell cell output__cell--key" title="sdfsdf"><input class="output__input" type="text" disabled=""></td><td class="output__cell cell output__cell--value" title=""><input class="output__input" type="text" disabled=""></td></tr><tr class="output__row"><td class="output__cell cell output__cell--key" title="sdfs"><input class="output__input" type="text" disabled=""></td><td class="output__cell cell output__cell--value" title=""><input class="output__input" type="text" disabled=""></td></tr><tr class="output__row"><td class="output__cell cell output__cell--key" title="sdgsdgdsf"><input class="output__input" type="text" disabled=""></td><td class="output__cell cell output__cell--value" title=""><input class="output__input" type="text" disabled=""></td></tr><tr class="output__row"><td class="output__cell cell output__cell--key" title="dgdgdfgdfdgf"><input class="output__input" type="text" disabled=""></td><td class="output__cell cell output__cell--value" title=""><input class="output__input" type="text" disabled=""></td></tr><tr class="output__row"><td class="output__cell cell output__cell--key" title="fdgdfgdfgdfgdf"><input class="output__input" type="text" disabled=""></td><td class="output__cell cell output__cell--value" title=""><input class="output__input" type="text" disabled=""></td></tr><tr class="output__row"><td class="output__cell cell output__cell--key" title="sdffgdgfdgdfdgf"><input class="output__input" type="text" disabled=""></td><td class="output__cell cell output__cell--value" title=""><input class="output__input" type="text" disabled=""></td></tr><tr class="output__row"><td class="output__cell cell output__cell--key" title="sdfsdfs"><input class="output__input" type="text" disabled=""></td><td class="output__cell cell output__cell--value" title=""><input class="output__input" type="text" disabled=""></td></tr><tr class="output__row"><td class="output__cell cell output__cell--key" title="fgdfgdfg"><input class="output__input" type="text" disabled=""></td><td class="output__cell cell output__cell--value" title=""><input class="output__input" type="text" disabled=""></td></tr><tr class="output__row"><td class="output__cell cell output__cell--key" title="sdfsdfsd"><input class="output__input" type="text" disabled=""></td><td class="output__cell cell output__cell--value" title=""><input class="output__input" type="text" disabled=""></td></tr><tr class="output__row"><td class="output__cell cell output__cell--key" title="sdfsdfsf"><input class="output__input" type="text" disabled=""></td><td class="output__cell cell output__cell--value" title=""><input class="output__input" type="text" disabled=""></td></tr><tr class="output__row"><td class="output__cell cell output__cell--key" title="sdgsdgdsdsf"><input class="output__input" type="text" disabled=""></td><td class="output__cell cell output__cell--value" title=""><input class="output__input" type="text" disabled=""></td></tr><tr class="output__row"><td class="output__cell cell output__cell--key" title="asdas"><input class="output__input" type="text" disabled=""></td><td class="output__cell cell output__cell--value" title="fasd"><input class="output__input" type="text" disabled=""></td></tr><tr class="output__row"><td class="output__cell cell output__cell--key" title="a"><input class="output__input" type="text" disabled=""></td><td class="output__cell cell output__cell--value" title="a"><input class="output__input" type="text" disabled=""></td></tr></tbody></table>
+            <table class="output__table"><tbody><tr class="output__row"><td class="output__cell cell output__cell--key" title="bank-count"><input class="output__input" type="text" disabled=""></td><td class="output__cell cell output__cell--value" title="3"><input class="output__input" type="text" disabled=""></td></tr><tr class="output__row"><td class="output__cell cell output__cell--key" title="sdfsdf"><input class="output__input" type="text" disabled=""></td><td class="output__cell cell output__cell--value" title=""><input class="output__input" type="text" disabled=""></td></tr><tr class="output__row"><td class="output__cell cell output__cell--key" title="sdfs"><input class="output__input" type="text" disabled=""></td><td class="output__cell cell output__cell--value" title=""><input class="output__input" type="text" disabled=""></td></tr></tbody></table>
         </section>
         <section class="main__input input"></section>
-
     </main>
     <footer class="footer">
         <div class="footer__buttons buttons">
-            <button id="add-button">+Add</button>
-            <button id="save-button">Save All</button>
+            <button id="add-button"><img src="./icons/icon-plus.png" alt="Icon plus"/>add</button>
+            <button id="save-button"><img src="./icons/icon-save.png" alt="Icon save"/>save All</button>
         </div>
-        <ul class="footer__list">
-            <li class="footer__list-item"><a href="#" class="footer__list-link">Support me <3</a></li>
-            <li class="footer__list-item"><a href="#" class="footer__list-link">Boosty</a></li>
-            <li class="footer__list-item"><a href="#" class="footer__list-link">Patreon</a></li>
-        </ul>
     </footer>
-    <div id="root"></div>
     <script src="popup.js"></script>
 </body>
 </html>

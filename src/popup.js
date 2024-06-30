@@ -10,7 +10,7 @@ init();
 
 editButton.addEventListener('click', ()  =>  {
     outputSection.querySelectorAll('.output__input').forEach((input)  =>  {
-        input.disabled = false;
+        input.disabled = !input.disabled;
     });
 });
 
@@ -26,13 +26,15 @@ saveButton.addEventListener('click', ()  =>  {
 
 addButton.addEventListener('click', ()  =>   {
     inputSection.appendChild(createTable({'': ''}, 'input__table'));
+    const main = document.querySelector('.main');
+    main.scrollTop = main.scrollHeight;
 })
 
 syncButton.addEventListener('click', ()  =>  {
     outputSection.innerHTML = '';
 
     chrome.runtime.sendMessage({ action: "syncStorage" }, (value) => {
-        const storage = JSON.parse(value).storage.local;
+        const storage = JSON.parse(value)?.storage?.local ?? {};
         outputSection.appendChild(createTable(storage));
         outputSection.querySelectorAll('.output__input').forEach((input)  =>  {
             input.disabled = true;
@@ -44,7 +46,7 @@ function init() {
     chrome.runtime.sendMessage({ action: "getStorage" }, (value) => {
         outputSection.innerHTML = '';
 
-        const storage = JSON.parse(value).storage.local;
+        const storage = JSON.parse(value)?.storage?.local ?? {};
         outputSection.appendChild(createTable(storage));
         outputSection.querySelectorAll('.output__input').forEach((input)  =>  {
             input.disabled = true;
