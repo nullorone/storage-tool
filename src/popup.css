@@ -64,9 +64,9 @@ body {
     border-bottom: 1px solid #000;
 }
 
-.header-list__button[disabled] {
+.header-list__button.disabled {
     color: #bfbfbf;
-    cursor: default;
+    border-bottom: none;
 }
 
 .nav__button {

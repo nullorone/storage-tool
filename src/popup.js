@@ -6,8 +6,31 @@ const copyAllButton = document.querySelector('#copy-all-button');
 const syncButton = document.querySelector('#sync-button');
 const outputSection  = document.querySelector('.output');
 const inputSection  = document.querySelector('.input');
+const headerList = document.querySelector('.header-list');
+const headerButtons = document.querySelectorAll('.header-list__button');
+
+let currentStorage = 'local';
 
 init();
+
+headerList.addEventListener('click', (evt) => {
+    if ([...evt.target.classList].includes('header-list__button')) {
+        const name = evt.target.name;
+
+        currentStorage = name;
+
+        headerButtons.forEach((button) => {
+            if (button.name === name) {
+                button.classList.remove('disabled');
+                button.classList.add('active');
+
+                return;
+            }
+
+            button.classList.add('disabled');
+        })
+    }
+}, true)
 
 editButton.addEventListener('click', ()  =>  {
     outputSection.querySelectorAll('.output__input').forEach((input)  =>  {
@@ -44,10 +67,11 @@ syncButton.addEventListener('click', ()  =>  {
 })
 
 copyAllButton.addEventListener('click', ()  =>  {
+    copyAllButton.disabled = true;
     chrome.runtime.sendMessage({ action: "copyAllStorage" }, (value) => {
         const storage = JSON.parse(value)?.storage?.local ?? '';
         navigator.clipboard.writeText(JSON.stringify(storage));
-        Notification('Storage copied!')
+        Notification(`Storage ${currentStorage} copied!`, copyAllButton)
     });
 })
 
@@ -155,7 +179,7 @@ function createSwitcher() {
     return switcher;
 }
 
-function Notification(message) {
+function Notification(message, button) {
     const body = document.body;
     const div = document.createElement('div');
     div.classList.add('notification', 'hide');
@@ -174,5 +198,9 @@ function Notification(message) {
 
     setTimeout(() => {
         notification.remove();
+
+        if (button) {
+            button.disabled = false;
+        }
     }, 2500);
 }
