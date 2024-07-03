@@ -1,5 +1,5 @@
 chrome.runtime.onMessage.addListener((message, info, cb) => {
-    if (message.action === "getStorage") {
+    if (message.action === "getStorage" || message.action === 'copyAllStorage') {
         getCurrentTab()
             .then((tab)  =>  {
                 chrome.storage.session.get(tab.url)

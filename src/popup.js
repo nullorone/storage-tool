@@ -2,6 +2,7 @@ const editButton = document.querySelector('#edit-button');
 const clearButton = document.querySelector('#clear-button');
 const saveButton = document.querySelector('#save-button');
 const addButton = document.querySelector('#add-button');
+const copyAllButton = document.querySelector('#copy-all-button');
 const syncButton = document.querySelector('#sync-button');
 const outputSection  = document.querySelector('.output');
 const inputSection  = document.querySelector('.input');
@@ -39,6 +40,14 @@ syncButton.addEventListener('click', ()  =>  {
         outputSection.querySelectorAll('.output__input').forEach((input)  =>  {
             input.disabled = true;
         });
+    });
+})
+
+copyAllButton.addEventListener('click', ()  =>  {
+    chrome.runtime.sendMessage({ action: "copyAllStorage" }, (value) => {
+        const storage = JSON.parse(value)?.storage?.local ?? '';
+        navigator.clipboard.writeText(JSON.stringify(storage));
+        Notification('Storage copied!')
     });
 })
 
@@ -144,4 +153,26 @@ function createSwitcher() {
     switcher.appendChild(label);
 
     return switcher;
+}
+
+function Notification(message) {
+    const body = document.body;
+    const div = document.createElement('div');
+    div.classList.add('notification', 'hide');
+    div.innerText = message;
+
+    body.append(div);
+
+    const notification = document.querySelector('.notification');
+
+    setTimeout(() => {
+        notification.classList.remove('hide');
+    }, 100);
+    setTimeout(() => {
+        notification.classList.add('hide');
+    }, 2000);
+
+    setTimeout(() => {
+        notification.remove();
+    }, 2500);
 }
