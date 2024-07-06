@@ -36,6 +36,12 @@ editButton.addEventListener('click', ()  =>  {
     outputSection.querySelectorAll('.output__input').forEach((input)  =>  {
         input.disabled = !input.disabled;
     });
+    outputSection.querySelectorAll('input[name="switcher"]').forEach((input)  =>  {
+        input.disabled = !input.disabled;
+    });
+    outputSection.querySelectorAll('.cell-button').forEach((button)  =>  {
+        button.disabled = !button.disabled;
+    });
 });
 
 clearButton.addEventListener('click', ()  =>  {
@@ -45,11 +51,19 @@ clearButton.addEventListener('click', ()  =>  {
 });
 
 saveButton.addEventListener('click', ()  =>  {
+    const inputKeyCellTable = inputSection.querySelector('td > input');
+
+    if (!inputKeyCellTable.value) {
+        Notification('New field empty!', saveButton, 'error');
+
+        return;
+    }
+
     updateStorage();
 });
 
 addButton.addEventListener('click', ()  =>   {
-    inputSection.appendChild(createTable({'': ''}, 'input__table'));
+    inputSection.appendChild(createTable({'': ''}, 'input__table', true));
     const main = document.querySelector('.main');
     main.scrollTop = main.scrollHeight;
 })
@@ -71,7 +85,7 @@ copyAllButton.addEventListener('click', ()  =>  {
     chrome.runtime.sendMessage({ action: "copyAllStorage" }, (value) => {
         const storage = JSON.parse(value)?.storage?.local ?? '';
         navigator.clipboard.writeText(JSON.stringify(storage));
-        Notification(`Storage ${currentStorage} copied!`, copyAllButton)
+        Notification(`Storage ${currentStorage} copied!`, copyAllButton, 'success')
     });
 })
 
@@ -127,9 +141,13 @@ function createTableCell(content, cellModificator) {
     return cell;
 }
 
-function createTableRow(nodes) {
+function createTableRow(nodes, key) {
     const row = document.createElement('tr');
     row.classList.add('output__row');
+
+    if (key) {
+        row.setAttribute('data-key', key);
+    }
 
     nodes.forEach(node => {
         row.appendChild(node);
@@ -138,7 +156,7 @@ function createTableRow(nodes) {
     return row;
 }
 
-function createTable(data, className) {
+function createTable(data, className, isAddTable) {
     const table = document.createElement('table');
     table.classList.add(className ?? 'output__table');
 
@@ -148,10 +166,28 @@ function createTable(data, className) {
 
     tableBody.innerHTML = '';
     keys.forEach((key, index) => {
-        const row = createTableRow([
+        const cells = [
             createTableCell(key, 'key'),
             createTableCell(values[index], 'value')
-        ]);
+        ];
+
+        if (!isAddTable) {
+            const handleTrashButton = (evt) => {
+                evt.preventDefault();
+                const row = evt.target.closest('tr');
+                const keyRow = row.getAttribute('data-key');
+
+                chrome.runtime.sendMessage({action: 'deleteItem', payload: keyRow}, () => {
+                    row.remove();
+                })
+            };
+
+            cells.unshift(createSwitcher());
+            cells.push(createCellButton('trash', handleTrashButton));
+        }
+
+        const row = createTableRow(cells, key);
+
         tableBody.appendChild(row);
     });
     table.appendChild(tableBody);
@@ -160,29 +196,47 @@ function createTable(data, className) {
 }
 
 function createSwitcher() {
-    const switcher = createTableCell('', 'switcher');
+    const cell = document.createElement('td');
+    cell.classList.add('cell__switcher');
 
     const label = document.createElement('label');
-    label.classList.add('cell__switcher');
+    label.classList.add('cell-label');
+    label.title = 'change state';
 
     const input = document.createElement('input');
     input.type = 'checkbox';
     input.name = 'switcher';
-    input.checked = false;
+    input.disabled = true;
+    input.checked = true;
 
     input.addEventListener('change', (evt)  =>  {
         evt.target.cheked = !evt.target.checked;
     });
-    label.appendChild(input);
-    switcher.appendChild(label);
 
-    return switcher;
+    label.appendChild(input);
+    cell.appendChild(label);
+
+    return cell;
 }
 
-function Notification(message, button) {
+function createCellButton(iconName, handleClick) {
+    const cell = document.createElement('td');
+    const button = document.createElement('button');
+
+    cell.classList.add('output__cell-button');
+    cell.title = 'delete row';
+    button.classList.add('cell-button', iconName);
+    button.disabled = true;
+    button.addEventListener('click', handleClick);
+    cell.appendChild(button);
+
+    return cell;
+}
+
+function Notification(message, button, type) {
     const body = document.body;
     const div = document.createElement('div');
-    div.classList.add('notification', 'hide');
+    div.classList.add('notification', 'hide', type);
     div.innerText = message;
 
     body.append(div);
