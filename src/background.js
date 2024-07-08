@@ -14,6 +14,29 @@ chrome.runtime.onMessage.addListener((message, info, cb) => {
         return true;
     }
 
+    if (message.action === 'deleteItem') {
+        const {currentStorage, keyRow} = message.payload;
+
+        getCurrentTab()
+            .then((tab)  =>  {
+                chrome.storage.session.get(tab.url)
+                    .then((result) =>  {
+                        const storage = JSON.parse(result[tab.url]).storage[currentStorage];
+                        const updatedStorage = Object.fromEntries(Object.entries(storage).filter(([key]) => key !== keyRow));
+                        const updatedData = {[tab.url]: JSON.stringify({storage: {local: updatedStorage}})};
+
+                        chrome.storage.session.set(updatedData)
+                            .then(() => {
+                                sendMessageToActiveTab({action: 'updateStorage', payload: {storage: { local: updatedStorage }}});
+
+                                cb();
+                            });
+                    });
+            });
+
+        return true;
+    }
+
     if (message.action  ===  "setStorage")  {
         const {name, ...data} = message.payload;
         chrome.storage.session.set({[name]: JSON.stringify({...data})});

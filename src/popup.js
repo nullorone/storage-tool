@@ -47,13 +47,14 @@ editButton.addEventListener('click', ()  =>  {
 clearButton.addEventListener('click', ()  =>  {
     chrome.runtime.sendMessage({ action: "clearStorage" }, () => {
         outputSection.innerHTML = '';
+        inputSection.innerHTML = '';
     });
 });
 
 saveButton.addEventListener('click', ()  =>  {
     const inputKeyCellTable = inputSection.querySelector('td > input');
 
-    if (!inputKeyCellTable.value) {
+    if (!inputKeyCellTable?.value) {
         Notification('New field empty!', saveButton, 'error');
 
         return;
@@ -178,7 +179,7 @@ function createTable(data, className, isAddTable) {
                 const row = evt.target.closest('tr');
                 const keyRow = row.getAttribute('data-key');
 
-                chrome.runtime.sendMessage({action: 'deleteItem', payload: keyRow}, () => {
+                chrome.runtime.sendMessage({action: 'deleteItem', payload: {currentStorage, keyRow}}, () => {
                     row.remove();
                 })
             };

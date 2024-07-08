@@ -14,6 +14,7 @@ chrome.runtime.onMessage.addListener((message, info, cb)  =>  {
 
     if (message.action === 'updateStorage') {
         const localStorageOfBackground = message.payload.storage.local;
+        localStorage.clear();
         Object.keys(localStorageOfBackground).forEach((key) => {
             localStorage.setItem(key, localStorageOfBackground[key]);
         })
