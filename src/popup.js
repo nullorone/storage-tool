@@ -70,6 +70,7 @@ addButton.addEventListener('click', ()  =>   {
 
 syncButton.addEventListener('click', ()  =>  {
     outputSection.innerHTML = '';
+    inputSection.innerHTML = '';
 
     chrome.runtime.sendMessage({ action: "syncStorage" }, (value) => {
         const storage = JSON.parse(value)?.storage?.local ?? {};
