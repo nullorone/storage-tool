@@ -1,6 +1,4 @@
-const editButton = document.querySelector('#edit-button');
 const clearButton = document.querySelector('#clear-button');
-const saveButton = document.querySelector('#save-button');
 const addButton = document.querySelector('#add-button');
 const copyAllButton = document.querySelector('#copy-all-button');
 const syncButton = document.querySelector('#sync-button');
@@ -30,37 +28,13 @@ headerList.addEventListener('click', (evt) => {
             button.classList.add('disabled');
         })
     }
-}, true)
-
-editButton.addEventListener('click', ()  =>  {
-    outputSection.querySelectorAll('.output__input').forEach((input)  =>  {
-        input.disabled = !input.disabled;
-    });
-    outputSection.querySelectorAll('input[name="switcher"]').forEach((input)  =>  {
-        input.disabled = !input.disabled;
-    });
-    outputSection.querySelectorAll('.cell-button').forEach((button)  =>  {
-        button.disabled = !button.disabled;
-    });
-});
+}, true);
 
 clearButton.addEventListener('click', ()  =>  {
     chrome.runtime.sendMessage({ action: "clearStorage" }, () => {
         outputSection.innerHTML = '';
         inputSection.innerHTML = '';
     });
-});
-
-saveButton.addEventListener('click', ()  =>  {
-    const inputKeyCellTable = inputSection.querySelector('td > input');
-
-    if (!inputKeyCellTable?.value) {
-        Notification('New field empty!', saveButton, 'error');
-
-        return;
-    }
-
-    updateStorage();
 });
 
 addButton.addEventListener('click', ()  =>   {
@@ -76,14 +50,10 @@ syncButton.addEventListener('click', ()  =>  {
     chrome.runtime.sendMessage({ action: "syncStorage" }, (value) => {
         const storage = JSON.parse(value)?.storage?.local ?? {};
         outputSection.appendChild(createTable(storage));
-        outputSection.querySelectorAll('.output__input').forEach((input)  =>  {
-            input.disabled = true;
-        });
     });
 })
 
 copyAllButton.addEventListener('click', ()  =>  {
-    copyAllButton.disabled = true;
     chrome.runtime.sendMessage({ action: "copyAllStorage" }, (value) => {
         const storage = JSON.parse(value)?.storage?.local ?? '';
         navigator.clipboard.writeText(JSON.stringify(storage));
@@ -97,9 +67,6 @@ function init() {
 
         const storage = JSON.parse(value)?.storage?.local ?? {};
         outputSection.appendChild(createTable(storage));
-        outputSection.querySelectorAll('.output__input').forEach((input)  =>  {
-            input.disabled = true;
-        });
     });
 }
 
@@ -120,10 +87,6 @@ function updateStorage() {
 
         const storage = JSON.parse(value).storage.local;
         outputSection.appendChild(createTable(storage));
-
-        outputSection.querySelectorAll('.output__input').forEach((input)  =>  {
-            input.disabled = true;
-        });
     })
 }
 
@@ -135,6 +98,8 @@ function createTableCell(content, cellModificator) {
     input.type = 'text';
     input.disabled = false;
     input.value = content;
+
+    input.addEventListener('blur', updateStorage);
 
     cell.classList.add('output__cell', 'cell', classModificator);
     cell.title = content;
@@ -184,8 +149,26 @@ function createTable(data, className, isAddTable) {
                 })
             };
 
-            cells.unshift(createSwitcher());
+            // cells.unshift(createSwitcher());
             cells.push(createCellButton('trash', handleTrashButton));
+        }
+
+        if (isAddTable) {
+            const handleSaveButton = (evt) => {
+                evt.preventDefault();
+
+                const inputKeyCellTable = inputSection.querySelector('td > input');
+
+                if (!inputKeyCellTable?.value) {
+                    Notification('New field empty!', document.querySelector('#save-button'), 'error');
+
+                    return;
+                }
+
+                updateStorage();
+            };
+
+            cells.push(createCellButton('save', handleSaveButton));
         }
 
         const row = createTableRow(cells, key);
@@ -208,7 +191,6 @@ function createSwitcher() {
     const input = document.createElement('input');
     input.type = 'checkbox';
     input.name = 'switcher';
-    input.disabled = true;
     input.checked = true;
 
     input.addEventListener('change', (evt)  =>  {
@@ -231,9 +213,9 @@ function createCellButton(iconName, handleClick) {
     const button = document.createElement('button');
 
     cell.classList.add('output__cell-button');
-    cell.title = 'delete row';
+    cell.title = `${iconName === 'trash' ? 'delete' : 'save'} row`;
     button.classList.add('cell-button', iconName);
-    button.disabled = true;
+    button.id = `${iconName}-button`;
     button.addEventListener('click', handleClick);
     cell.appendChild(button);
 
@@ -259,9 +241,5 @@ function Notification(message, button, type) {
 
     setTimeout(() => {
         notification.remove();
-
-        if (button) {
-            button.disabled = false;
-        }
     }, 2500);
 }

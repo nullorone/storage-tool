@@ -70,15 +70,17 @@ body {
 }
 
 .nav__button {
-    width: 35px;
-    height: 35px;
-    padding: 0;
+    padding: 4px;
     border-radius: 16px;
     box-shadow: 0 0 2px 0 rgba(58, 66, 75, 0.1);
     background: #fff;
     border: none;
     cursor: pointer;
     transition: background-color 0.2s linear;
+}
+
+img {
+    display: block;
 }
 
 .nav__button:hover {
@@ -116,10 +118,6 @@ body {
     object-fit: contain;
 }
 
-#edit-button {
-    background: #ffda56;
-}
-
 #clear-button,
 #copy-all-button {
     background: #fff;
@@ -127,29 +125,50 @@ body {
 
 #add-button {
     flex-basis: auto;
-    box-shadow: 0 0 2px 0 rgba(58, 66, 75, 0.6);
+    background: #ffda56;
 }
 
+#trash-button,
 #save-button {
-    background: #000;
-    color: #fff;
-    flex-basis: 100%;
+    padding: 4px;
+    box-shadow: none;
+    border: none;
+    opacity: 0.3;
+    transition: opacity 0.2s linear;
+}
+
+#trash-button:hover,
+#save-button:hover {
+    opacity: 1;
 }
 
 .main {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
     flex-grow: 1;
     overflow-y: auto;
-}
-
-.output {
-    border-radius: 8px;
-    background: #fff;
 }
 
 .output__table,
 .input__table {
     width: 100%;
-    border-spacing: 8px;
+    border-spacing: 0 8px;
+}
+
+.output__row > td:first-child {
+    border-top-left-radius: 12px;
+    border-bottom-left-radius: 12px;
+}
+
+.output__row > td:last-child {
+    border-top-right-radius: 12px;
+    border-bottom-right-radius: 12px;
+}
+
+.output__cell {
+    padding: 8px;
+    background: #fff;
 }
 
 .output__input {
@@ -166,6 +185,12 @@ body {
 
 .output__cell-button {
     width: 56px;
+}
+
+.output__cell-button:has(button[id="trash-button"]),
+.output__cell-button:has(button[id="save-button"]) {
+    width: 40px;
+    background-color: #fff;
 }
 
 .cell-button {
@@ -189,6 +214,10 @@ body {
 
 .cell-button.trash {
     background-image: url('./icons/icon-trash.svg');
+}
+
+.cell-button.save {
+    background-image: url('./icons/icon-save.svg');
 }
 
 .cell__switcher {
