@@ -4,7 +4,7 @@
     "description": "__MSG_description__",
     "author": "sy.v@mail.ru",
     "default_locale": "en",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "icons": {
         "32": "icons/icon-32.png",
         "64": "icons/icon-64.png",
