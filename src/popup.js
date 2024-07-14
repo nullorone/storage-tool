@@ -213,6 +213,11 @@ function createSwitcher() {
 
     input.addEventListener('change', (evt)  =>  {
         evt.target.cheked = !evt.target.checked;
+
+        const row = evt.target.closest('tr');
+        const keyRow = row.getAttribute('data-key');
+
+        chrome.runtime.sendMessage({action: 'switchItem', payload: {currentStorage, keyRow}});
     });
 
     label.appendChild(input);
