@@ -156,22 +156,26 @@ img {
     border-spacing: 0 8px;
 }
 
-.output__row > td:first-child {
+.output__row > td:first-child,
+.input__row > td:first-child {
     border-top-left-radius: 12px;
     border-bottom-left-radius: 12px;
 }
 
-.output__row > td:last-child {
+.output__row > td:last-child,
+.input__row > td:last-child {
     border-top-right-radius: 12px;
     border-bottom-right-radius: 12px;
 }
 
-.output__cell {
+.output__cell,
+.input__cell {
     padding: 8px;
     background: #fff;
 }
 
-.output__input {
+.output__input,
+.input__input {
     width: 100%;
     display: block;
     min-height: 35px;
@@ -183,12 +187,13 @@ img {
     box-sizing: border-box;
 }
 
-.output__cell-button {
+.output__cell-button,
+.input__cell-button {
     width: 56px;
 }
 
 .output__cell-button:has(button[id="trash-button"]),
-.output__cell-button:has(button[id="save-button"]) {
+.input__cell-button:has(button[id="save-button"]) {
     width: 40px;
     background-color: #fff;
 }

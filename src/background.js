@@ -21,13 +21,13 @@ chrome.runtime.onMessage.addListener((message, info, cb) => {
             .then((tab)  =>  {
                 chrome.storage.session.get(tab.url)
                     .then((result) =>  {
-                        const storage = JSON.parse(result[tab.url]).storage[currentStorage];
-                        const updatedStorage = Object.fromEntries(Object.entries(storage).filter(([key]) => key !== keyRow));
-                        const updatedData = {[tab.url]: JSON.stringify({storage: {local: updatedStorage}})};
+                        const storage = JSON.parse(result[tab.url]).storage;
+                        const updatedStorage = Object.fromEntries(Object.entries(storage?.[currentStorage]).filter(([key]) => key !== keyRow));
+                        const updatedData = {[tab.url]: JSON.stringify({storage: {...storage, [currentStorage]: updatedStorage}})};
 
                         chrome.storage.session.set(updatedData)
                             .then(() => {
-                                sendMessageToActiveTab({action: 'updateStorage', payload: {storage: { local: updatedStorage }}});
+                                sendMessageToActiveTab({action: 'updateStorage', payload: {storage: {...storage, [currentStorage]: updatedStorage, current: currentStorage}}});
 
                                 cb();
                             });
@@ -45,25 +45,26 @@ chrome.runtime.onMessage.addListener((message, info, cb) => {
     }
 
     if (message.action  ===  "syncStorage") {
-        sendMessageToActiveTab({action: 'syncStorage'}, ({name, ...data}) => {
-            const storageLocalData = JSON.stringify({...data});
+        sendMessageToActiveTab({action: 'syncStorage', payload: {currentStorage: message.payload.currentStorage}}, ({name, ...data}) => {
+            const storageData = JSON.stringify({...data});
 
-            chrome.storage.session.set({[name]: storageLocalData});
-            cb(storageLocalData);
+            chrome.storage.session.set({[name]: storageData});
+            cb(storageData);
         })
 
         return true;
     }
 
     if (message.action === "updateStorage") {
-        const data = message.payload;
+        const data = message.payload.data;
+        const currentStorage = message.payload.currentStorage;
 
         getCurrentTab()
             .then((tab)  =>  {
-                chrome.storage.session.get(tab.url)
+                chrome.storage.session.get(tab?.url)
                     .then((result) =>  {
                         const resultStorage = JSON.parse(result[tab.url]).storage;
-                        const updatedStorage = {...resultStorage, local: data};
+                        const updatedStorage = {...resultStorage, [currentStorage]: data};
                         const updatedData = {[tab.url]: JSON.stringify({storage: updatedStorage})};
 
                         chrome.storage.session.set(updatedData)
@@ -71,7 +72,7 @@ chrome.runtime.onMessage.addListener((message, info, cb) => {
                                 cb(JSON.stringify({storage: updatedStorage}));
                             })
                             .then(() => {
-                                sendMessageToActiveTab({action: 'updateStorage', payload: {storage: updatedStorage}});
+                                sendMessageToActiveTab({action: 'updateStorage', payload: {storage: {current: currentStorage, [currentStorage]: updatedStorage[currentStorage]}}});
                             })
                             .catch(()  =>  {
                                 cb({});
@@ -86,7 +87,7 @@ chrome.runtime.onMessage.addListener((message, info, cb) => {
     }
 
     if (message.action === "clearStorage") {
-        sendMessageToActiveTab({action: 'clearStorage'});
+        sendMessageToActiveTab({action: 'clearStorage', payload: {storage: {current: message.payload.storage.currentStorage}}});
         getCurrentTab()
             .then((tab)  =>  {
                 chrome.storage.session.set({[tab.url]: JSON.stringify({storage: {}})});

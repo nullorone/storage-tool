@@ -16,6 +16,7 @@ headerList.addEventListener('click', (evt) => {
         const name = evt.target.name;
 
         currentStorage = name;
+        syncStorage(currentStorage);
 
         headerButtons.forEach((button) => {
             if (button.name === name) {
@@ -31,7 +32,7 @@ headerList.addEventListener('click', (evt) => {
 }, true);
 
 clearButton.addEventListener('click', ()  =>  {
-    chrome.runtime.sendMessage({ action: "clearStorage" }, () => {
+    chrome.runtime.sendMessage({ action: "clearStorage", payload: {storage: {currentStorage}} }, () => {
         outputSection.innerHTML = '';
         inputSection.innerHTML = '';
     });
@@ -47,15 +48,12 @@ syncButton.addEventListener('click', ()  =>  {
     outputSection.innerHTML = '';
     inputSection.innerHTML = '';
 
-    chrome.runtime.sendMessage({ action: "syncStorage" }, (value) => {
-        const storage = JSON.parse(value)?.storage?.local ?? {};
-        outputSection.appendChild(createTable(storage));
-    });
+    syncStorage(currentStorage);
 })
 
 copyAllButton.addEventListener('click', ()  =>  {
     chrome.runtime.sendMessage({ action: "copyAllStorage" }, (value) => {
-        const storage = JSON.parse(value)?.storage?.local ?? '';
+        const storage = JSON.parse(value)?.storage?.[currentStorage] ?? '';
         navigator.clipboard.writeText(JSON.stringify(storage));
         Notification(`Storage ${currentStorage} copied!`, copyAllButton, 'success')
     });
@@ -65,7 +63,7 @@ function init() {
     chrome.runtime.sendMessage({ action: "getStorage" }, (value) => {
         outputSection.innerHTML = '';
 
-        const storage = JSON.parse(value)?.storage?.local ?? {};
+        const storage = JSON.parse(value)?.storage?.[currentStorage] ?? {};
         outputSection.appendChild(createTable(storage));
     });
 }
@@ -73,44 +71,47 @@ function init() {
 function updateStorage() {
     const addedData = {};
     const outputRows = outputSection.querySelectorAll('.output__row');
-    const inputRows = inputSection.querySelectorAll('.output__row');
+    const inputRows = inputSection.querySelectorAll('.input__row');
 
     [...outputRows, ...inputRows].forEach((row) => {
-        const keyCell = row.querySelector('.output__cell--key input');
-        const valueCell = row.querySelector('.output__cell--value input');
+        const keyCell = row.querySelector('.cell--key input');
+        const valueCell = row.querySelector('.cell--value input');
         addedData[keyCell.value] = valueCell.value;
     });
 
-    chrome.runtime.sendMessage({ action: "updateStorage",  payload: addedData  }, (value) => {
+    chrome.runtime.sendMessage({ action: "updateStorage",  payload: {data: addedData, currentStorage}  }, (value) => {
         outputSection.innerHTML = '';
         inputSection.innerHTML = '';
 
-        const storage = JSON.parse(value).storage.local;
+        const storage = JSON.parse(value).storage?.[currentStorage] ?? {};
+        console.log(storage);
         outputSection.appendChild(createTable(storage));
     })
 }
 
-function createTableCell(content, cellModificator) {
+function createTableCell(content, cellModificator, tableType = 'output') {
     const cell = document.createElement('td');
     const input = document.createElement('input');
-    const classModificator = cellModificator ? `output__cell--${cellModificator}` : ' ';
-    input.classList.add('output__input');
+    const classModificator = cellModificator ? `cell--${cellModificator}` : ' ';
+    input.classList.add(`${tableType}__input`);
     input.type = 'text';
     input.disabled = false;
     input.value = content;
 
-    input.addEventListener('blur', updateStorage);
+    if (tableType === 'output') {
+        input.addEventListener('blur', updateStorage);
+    }
 
-    cell.classList.add('output__cell', 'cell', classModificator);
+    cell.classList.add(`${tableType}__cell`, 'cell', classModificator);
     cell.title = content;
     cell.appendChild(input);
 
     return cell;
 }
 
-function createTableRow(nodes, key) {
+function createTableRow(nodes, key, isAddTable) {
     const row = document.createElement('tr');
-    row.classList.add('output__row');
+    row.classList.add(isAddTable ? 'input__row' : 'output__row');
 
     if (key) {
         row.setAttribute('data-key', key);
@@ -123,9 +124,9 @@ function createTableRow(nodes, key) {
     return row;
 }
 
-function createTable(data, className, isAddTable) {
+function createTable(data, className = 'output__table', isAddTable) {
     const table = document.createElement('table');
-    table.classList.add(className ?? 'output__table');
+    table.classList.add(className);
 
     const keys = Object.keys(data);
     const values = Object.values(data);
@@ -134,8 +135,8 @@ function createTable(data, className, isAddTable) {
     tableBody.innerHTML = '';
     keys.forEach((key, index) => {
         const cells = [
-            createTableCell(key, 'key'),
-            createTableCell(values[index], 'value')
+            createTableCell(key, 'key', isAddTable ? 'input' : 'output'),
+            createTableCell(values[index], 'value', isAddTable ? 'input' : 'output')
         ];
 
         if (!isAddTable) {
@@ -171,7 +172,7 @@ function createTable(data, className, isAddTable) {
             cells.push(createCellButton('save', handleSaveButton));
         }
 
-        const row = createTableRow(cells, key);
+        const row = createTableRow(cells, key, isAddTable);
 
         tableBody.appendChild(row);
     });
@@ -212,7 +213,7 @@ function createCellButton(iconName, handleClick) {
     const cell = document.createElement('td');
     const button = document.createElement('button');
 
-    cell.classList.add('output__cell-button');
+    cell.classList.add(`${iconName === 'save' ? 'input' : 'output'}__cell-button`);
     cell.title = `${iconName === 'trash' ? 'delete' : 'save'} row`;
     button.classList.add('cell-button', iconName);
     button.id = `${iconName}-button`;
@@ -242,4 +243,13 @@ function Notification(message, button, type) {
     setTimeout(() => {
         notification.remove();
     }, 2500);
+}
+
+function syncStorage(currentStorage) {
+    outputSection.innerHTML = '';
+
+    chrome.runtime.sendMessage({ action: "syncStorage", payload: {currentStorage}}, (value) => {
+        const storage = JSON.parse(value)?.storage?.[currentStorage] ?? {};
+        outputSection.appendChild(createTable(storage));
+    });
 }

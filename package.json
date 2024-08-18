@@ -1,6 +1,6 @@
 {
     "name": "Storage tool",
-    "version": "1.0.0",
+    "version": "1.2.0",
     "description": "Tool for managing storage",
     "scripts":  {
         "start":  "web-ext run --source-dir ./src --watch-file",
